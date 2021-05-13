@@ -1,0 +1,36 @@
+version: '3.5'
+services:
+  db:
+    image: postgres:12.4
+    volumes:
+      - ./scripts/db:/docker-entrypoint-initdb.d
+    container_name: cars-db
+    restart: always
+    networks:
+      - cars_net
+    ports:
+      - 5439:5432
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_DB
+  api:
+    container_name: cars-api
+    restart: always
+    build:
+      args:
+        PROJECT_NAME: cars
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - cars_net
+    ports:
+      - '8080:8080'
+    environment:
+      - APP_ENV=development
+      - APP_ENDPOINT
+      - PORT
+    command: ./cars
+networks:
+  cars_net:
+    name: cars_net
